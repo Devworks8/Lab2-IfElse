@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Lab2_Christian_Lachapelle
 {
@@ -65,7 +66,7 @@ namespace Lab2_Christian_Lachapelle
     /*
      * This class contains the operation methods
      */
-    public class StudentManager
+    public class StudentManager : FileOperations
     {
         // Create a dictionary to hold the student objects
         Dictionary<string, Student> studentDict = new Dictionary<string, Student>();
@@ -114,7 +115,6 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            CallMenu(); // Call the menu
         }
 
         // This method removes a student or removes all students
@@ -160,7 +160,6 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            CallMenu(); // Call menu
         }
 
         // This method lists a student information or all students information
@@ -223,7 +222,6 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            CallMenu(); // Call menu
         }
 
         // This method modifies a student's grade
@@ -296,58 +294,198 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            CallMenu(); // Call menu
         }
 
         // This method call displays the menu
         public void CallMenu()
         {
             Console.Clear();
-            Console.Write(@"
+            Console.Write($@"
 What would you like to do?
+Current working file: {workingFile}
 
-            1) Add Student
-            2) Remove Student
-            3) List Student(s)
-            4) Modify Student
-            0) Quit
+            File Operations
+            ----------------
+            1) Open File
+            2) Save File
+            3) Delete File
+            4) Close File
+
+            Subset Operations
+            -----------------
+            5) New Subset
+            6) Delete Subset
+
+            Record Operations
+            -----------------
+
+            7) Add Student
+            8) Remove Student
+            9) List Student(s)
+            0) Modify Student
+
+            Q) Quit
 
 Selection: ");
-            byte ans; // User's menu selection
-          
+            char ans; // User's menu selection
+
             /*
              * If the input isn't a valid byte and 
              * the input is out of range - Try again
              */
-            while (!byte.TryParse(Console.ReadLine(), out ans) || !(ans >= 0) || !(ans <= 4))
+            while (!char.TryParse(Console.ReadLine(), out ans) && !((byte)ans >= 48 && (byte)ans <= 57) && (byte)ans != 81 && (byte)ans != 113)
             {
+
+                Console.WriteLine(ans);
+                Console.WriteLine((byte)ans);
+                Console.WriteLine(!((byte)ans >= 48 && (byte)ans <= 57));
+                Console.WriteLine((byte)ans != 81);
+                Console.WriteLine((byte)ans != 113);
+
                 Console.WriteLine("ERROR: Invalid entry - Please try again");
                 Console.WriteLine("\nPress any key to contiunue\n");
                 Console.ReadKey(true);
                 CallMenu(); // Call menu
             }
 
-            switch (ans)
+            switch ((byte)ans)
             {
-                case 1: // Add student
+                case 49: // Open file
+                    ReadSet(); // Need to validate file
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 50: // Save file
+                    WriteSet();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 51: // Delete file
+                    DeleteSet();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 52: //Close file
+                    CloseSet();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 53: // New subset
+                    CreateNewSubset();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 54: // Delete subset
+                    DeleteSubset();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 55: // Add student
                     AddStudent();
+                    CallMenu(); // Call the menu
                     break;
 
-                case 2: // Remove Student
+                case 56: // Remove Student
                     RemoveStudent();
+                    CallMenu(); // Call the menu
                     break;
 
-                case 3: // List Student(s)
+                case 57: // List Student(s)
                     ListStudent();
+                    CallMenu(); // Call the menu
                     break;
 
-                case 4: // modify Student
+                case 48: // modify Student
                     ModifyStudent();
+                    CallMenu(); // Call the menu
                     break;
 
                 default: // Exit application
                     Environment.Exit(0);
                     break;
+            }
+        }
+    }
+
+    /*
+     * This class contains all file I/O operations
+     */
+    public class FileOperations
+    {
+        const string filePath = @"./data"; // Files are to be found in this subdirectory
+        public string workingFile;
+
+        // Class constructor checks if the data subdirectory exists; if not, create it
+        public FileOperations()
+        {
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "data"))
+            {
+                // Create the directory if it doesn't exist
+                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "data");
+            }
+        }
+
+        // Read file
+        public void ReadSet()
+        {
+            
+        }
+
+        // Write File
+        public void WriteSet()
+        {
+            
+        }
+
+        // Close the file
+        public void CloseSet()
+        {
+            
+        }
+
+        // Validate file
+        public void ValidateFile()
+        {
+            
+        }
+
+        // Create a new file
+        public void CreateNewSet()
+        {
+            
+        }
+
+        // Delete file
+        public void DeleteSet()
+        {
+            
+        }
+
+        // Change working file
+        public void ChangeSet()
+        {
+            
+        }
+
+        // Create a new set of records in file
+        public void CreateNewSubset()
+        {
+            
+        }
+
+        // Delete subset from file
+        public void DeleteSubset()
+        {
+            
+        }
+
+        // List all available record sets in the data subdirectory
+        public void ListSets()
+        {
+            string[] files = Directory.GetFiles(filePath, "*.cvs");
+            foreach (var file in files)
+            {
+                Console.WriteLine(file);
             }
         }
     }
