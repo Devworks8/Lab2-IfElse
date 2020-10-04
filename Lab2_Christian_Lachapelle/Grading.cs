@@ -19,7 +19,7 @@ namespace Lab2_Christian_Lachapelle
      * This class contains the grading scheme
      * It is inherited by the Student class
      */
-    class Grading
+    public class Grading
     {
         // Create a dictionary with a char datatype as a key, tuple as a value
         public Dictionary<char, Tuple<double, double>> gradingScheme =
@@ -38,24 +38,24 @@ namespace Lab2_Christian_Lachapelle
      * contains all the pertinent student information, and performs the
      * initial grade percentage conversion to a grade letter.
      */
-    class Student : Grading
+    public class Student : Grading
     {
-        public string studentName { get; set; }
-        public double studentGrade { get; set; }
-        public char studentLetterGrade { get; set; }
+        public string StudentName { get; set; }
+        public double StudentGrade { get; set; }
+        public char StudentLetterGrade { get; set; }
 
         // Class constructor method
         public Student(string name, double grade)
         {
-            studentName = name;
-            studentGrade = grade;
+            StudentName = name;
+            StudentGrade = grade;
 
             // Determine the approciate grade letter to assign
             foreach(KeyValuePair<char, Tuple<double, double>> kvp in gradingScheme)
             {
-                if (studentGrade >= kvp.Value.Item1)
+                if (StudentGrade >= kvp.Value.Item1)
                 {
-                    studentLetterGrade = kvp.Key;
+                    StudentLetterGrade = kvp.Key;
                     break;
                 }
             }
@@ -72,7 +72,7 @@ namespace Lab2_Christian_Lachapelle
         bool _cancel = false; // User cancel flag
 
         // This method adds a new student to the dictionary
-        private void addStudent()
+        private void AddStudent()
         {
             _cancel = false; // Reset flag
             string name; // Student's name
@@ -114,11 +114,11 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            callMenu(); // Call the menu
+            CallMenu(); // Call the menu
         }
 
         // This method removes a student or removes all students
-        private void removeStudent()
+        private void RemoveStudent()
         {
             _cancel = false; // Reset flag
             string name; // Student's Name
@@ -160,11 +160,11 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            callMenu(); // Call menu
+            CallMenu(); // Call menu
         }
 
         // This method lists a student information or all students information
-        private void listStudent()
+        private void ListStudent()
         {
             _cancel = false; // Reset flag
             string name; // Student's Name
@@ -204,17 +204,17 @@ namespace Lab2_Christian_Lachapelle
                 foreach (Student obj in student)
                 {
                     Console.WriteLine(String.Format($"{studentInfo}",
-                        obj.studentName, obj.studentGrade,
-                        obj.studentGrade, obj.studentLetterGrade));
+                        obj.StudentName, obj.StudentGrade,
+                        obj.StudentGrade, obj.StudentLetterGrade));
                 }
             }
             else if (!String.IsNullOrEmpty(name)) // Show requested student
             {
                 Console.WriteLine(String.Format($"{studentInfo}",
-                    studentDict[name].studentName,
-                    studentDict[name].studentGrade,
-                    studentDict[name].studentGrade,
-                    studentDict[name].studentLetterGrade));
+                    studentDict[name].StudentName,
+                    studentDict[name].StudentGrade,
+                    studentDict[name].StudentGrade,
+                    studentDict[name].StudentLetterGrade));
             }
             else
             {
@@ -223,11 +223,11 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            callMenu(); // Call menu
+            CallMenu(); // Call menu
         }
 
         // This method modifies a student's grade
-        private void modifyStudent()
+        private void ModifyStudent()
         {
             _cancel = false; // reset flag
             string name; // Student's name
@@ -277,14 +277,14 @@ namespace Lab2_Christian_Lachapelle
 
             if (!_cancel)
             {
-                studentDict[name].studentGrade = grade; // Assign new grade
+                studentDict[name].StudentGrade = grade; // Assign new grade
 
                 // Assign new letter grade
                 foreach (KeyValuePair<char, Tuple<double, double>> kvp in studentDict[name].gradingScheme)
                 {
                     if (grade >= kvp.Value.Item1)
                     {
-                        studentDict[name].studentLetterGrade = kvp.Key;
+                        studentDict[name].StudentLetterGrade = kvp.Key;
                         break;
                     }
                 }
@@ -296,11 +296,11 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
-            callMenu(); // Call menu
+            CallMenu(); // Call menu
         }
 
         // This method call displays the menu
-        public void callMenu()
+        public void CallMenu()
         {
             Console.Clear();
             Console.Write(@"
@@ -324,25 +324,25 @@ Selection: ");
                 Console.WriteLine("ERROR: Invalid entry - Please try again");
                 Console.WriteLine("\nPress any key to contiunue\n");
                 Console.ReadKey(true);
-                callMenu(); // Call menu
+                CallMenu(); // Call menu
             }
 
             switch (ans)
             {
                 case 1: // Add student
-                    addStudent();
+                    AddStudent();
                     break;
 
                 case 2: // Remove Student
-                    removeStudent();
+                    RemoveStudent();
                     break;
 
                 case 3: // List Student(s)
-                    listStudent();
+                    ListStudent();
                     break;
 
                 case 4: // modify Student
-                    modifyStudent();
+                    ModifyStudent();
                     break;
 
                 default: // Exit application
@@ -352,13 +352,13 @@ Selection: ");
         }
     }
 
-    class MainClass
+    public class MainClass
     {
         public static void Main(string[] args)
         {
 
             StudentManager manager = new StudentManager();
-            manager.callMenu();
+            manager.CallMenu();
         }
     }
 }
