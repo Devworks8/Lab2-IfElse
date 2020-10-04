@@ -335,13 +335,6 @@ Selection: ");
              */
             while (!char.TryParse(Console.ReadLine(), out ans) && !((byte)ans >= 48 && (byte)ans <= 57) && (byte)ans != 81 && (byte)ans != 113)
             {
-
-                Console.WriteLine(ans);
-                Console.WriteLine((byte)ans);
-                Console.WriteLine(!((byte)ans >= 48 && (byte)ans <= 57));
-                Console.WriteLine((byte)ans != 81);
-                Console.WriteLine((byte)ans != 113);
-
                 Console.WriteLine("ERROR: Invalid entry - Please try again");
                 Console.WriteLine("\nPress any key to contiunue\n");
                 Console.ReadKey(true);
