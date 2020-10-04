@@ -455,7 +455,7 @@ Selection: ");
         }
 
         // Change working file
-        public void ChangeSet()
+        public void ChangeSubset()
         {
             
         }
