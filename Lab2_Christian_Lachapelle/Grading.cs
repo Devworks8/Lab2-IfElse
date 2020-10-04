@@ -70,7 +70,12 @@ namespace Lab2_Christian_Lachapelle
     {
         // Create a dictionary to hold the student objects
         Dictionary<string, Student> studentDict = new Dictionary<string, Student>();
-        bool _cancel = false; // User cancel flag
+        private bool _cancel { get; set; } = false; // User cancel flag
+
+        public StudentManager() : base()
+        {
+            // Call FileOperations constructor
+        }
 
         // This method adds a new student to the dictionary
         private void AddStudent()
@@ -111,7 +116,7 @@ namespace Lab2_Christian_Lachapelle
             {
                 Console.WriteLine("Operation cancelled");
             }
-            
+
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
@@ -147,7 +152,7 @@ namespace Lab2_Christian_Lachapelle
 
             if (name.Contains("*")) // Remove all students from dictionary
             {
-                studentDict.Clear(); 
+                studentDict.Clear();
             }
             else if (!_cancel)
             {
@@ -180,7 +185,7 @@ namespace Lab2_Christian_Lachapelle
              * If name is empty - Cancel operation
              */
             while (!studentDict.ContainsKey(name) && !name.Contains("*"))
-            { 
+            {
                 if (!String.IsNullOrEmpty(name))
                 {
                     Console.WriteLine("ERROR: Student not found - Please try again");
@@ -306,34 +311,42 @@ Current working file: {workingFile}
 
             File Operations
             ----------------
-            1) Open File
-            2) Save File
-            3) Delete File
-            4) Close File
+            N) New File
+            O) Open File
+            S) Save File
+            D) Delete File
+            C) Close File
 
             Subset Operations
             -----------------
-            5) New Subset
-            6) Delete Subset
+            U) New Subset
+            W) Delete Subset
 
             Record Operations
             -----------------
 
-            7) Add Student
-            8) Remove Student
-            9) List Student(s)
-            0) Modify Student
+            A) Add Student
+            R) Remove Student
+            L) List Student(s)
+            M) Modify Student
 
             Q) Quit
 
 Selection: ");
             char ans; // User's menu selection
+            // List of all valid menu selections
+            var selections = new List<char>()
+            {
+                'N', 'O', 'S', 'D', 'C', 'U', 'W', 'A', 'R', 'L', 'M', 'Q'
+            };
 
             /*
-             * If the input isn't a valid byte and 
-             * the input is out of range - Try again
+             * If the input isn't a valid char and 
+             * the input is not in the valid selection list - Try again
              */
-            while (!char.TryParse(Console.ReadLine(), out ans) && !((byte)ans >= 48 && (byte)ans <= 57) && (byte)ans != 81 && (byte)ans != 113)
+            while (!Char.TryParse(Console.ReadLine(), out ans) ||
+                !(selections.Contains(Char.ToUpper(ans))))
+            
             {
                 Console.WriteLine("ERROR: Invalid entry - Please try again");
                 Console.WriteLine("\nPress any key to contiunue\n");
@@ -341,54 +354,59 @@ Selection: ");
                 CallMenu(); // Call menu
             }
 
-            switch ((byte)ans)
+            switch (char.ToUpper(ans))
             {
-                case 49: // Open file
+                case 'N': // New file
+                    CreateNewSet();
+                    CallMenu(); // Call the menu
+                    break;
+
+                case 'O': // Open file
                     ReadSet(); // Need to validate file
                     CallMenu(); // Call the menu
                     break;
 
-                case 50: // Save file
+                case 'S': // Save file
                     WriteSet();
                     CallMenu(); // Call the menu
                     break;
 
-                case 51: // Delete file
+                case 'D': // Delete file
                     DeleteSet();
                     CallMenu(); // Call the menu
                     break;
 
-                case 52: //Close file
+                case 'C': //Close file
                     CloseSet();
                     CallMenu(); // Call the menu
                     break;
 
-                case 53: // New subset
+                case 'U': // New subset
                     CreateNewSubset();
                     CallMenu(); // Call the menu
                     break;
 
-                case 54: // Delete subset
+                case 'W': // Delete subset
                     DeleteSubset();
                     CallMenu(); // Call the menu
                     break;
 
-                case 55: // Add student
+                case 'A': // Add student
                     AddStudent();
                     CallMenu(); // Call the menu
                     break;
 
-                case 56: // Remove Student
+                case 'R': // Remove Student
                     RemoveStudent();
                     CallMenu(); // Call the menu
                     break;
 
-                case 57: // List Student(s)
+                case 'L': // List Student(s)
                     ListStudent();
                     CallMenu(); // Call the menu
                     break;
 
-                case 48: // modify Student
+                case 'M': // modify Student
                     ModifyStudent();
                     CallMenu(); // Call the menu
                     break;
@@ -405,8 +423,9 @@ Selection: ");
      */
     public class FileOperations
     {
-        const string filePath = @"./data"; // Files are to be found in this subdirectory
-        public string workingFile;
+        string filePath = AppDomain.CurrentDomain.BaseDirectory + "data/"; // Files are to be found in this subdirectory
+        private bool _cancel { get; set; }
+        public string workingFile { get; set; }
 
         // Class constructor checks if the data subdirectory exists; if not, create it
         public FileOperations()
@@ -437,15 +456,58 @@ Selection: ");
         }
 
         // Validate file
-        public void ValidateFile()
+        public bool ValidateFile(string filename)
         {
-            
+            string path = $@"{filePath}{filename}.csv";
+
+            if (File.Exists(path))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         // Create a new file
         public void CreateNewSet()
         {
-            
+            _cancel = false; // Reset flag
+
+            Console.Write("\nEnter new filename: ");
+            string filename = Console.ReadLine();
+
+            /*
+             * If the the file exists - try again
+             * If filename is left blank - cancel operation 
+             */
+            while (!ValidateFile(filename) || String.IsNullOrEmpty(filename))
+            {
+                if (!String.IsNullOrEmpty(filename))
+                {
+                    Console.WriteLine($"ERROR: {filename}.csv already exists - Please try again");
+                    Console.Write("\nEnter new filename: ");
+                    filename = Console.ReadLine();
+                }
+                else
+                {
+                    _cancel = true; // Cancel operation
+                    break;
+                }
+            }
+
+            if (!_cancel)
+            {
+                // Assign path and filename to workingFile to be referenced later on
+                workingFile = $@"{filePath}{filename}.csv";
+            }
+            else
+            {
+                Console.WriteLine("\nOperation cancelled");
+            }
+
+
+            Console.WriteLine("\nPress any key to contiunue\n");
+            Console.ReadKey(true);
         }
 
         // Delete file
