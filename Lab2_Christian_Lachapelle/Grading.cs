@@ -320,6 +320,7 @@ Current working file: {workingFile}
             Subset Operations
             -----------------
             U) New Subset
+            V) Change Subset
             W) Delete Subset
 
             Record Operations
@@ -337,7 +338,7 @@ Selection: ");
             // List of all valid menu selections
             var selections = new List<char>()
             {
-                'N', 'O', 'S', 'D', 'C', 'U', 'W', 'A', 'R', 'L', 'M', 'Q'
+                'N', 'O', 'S', 'D', 'C', 'U', 'V', 'W', 'A', 'R', 'L', 'M', 'Q'
             };
 
             /*
@@ -386,6 +387,11 @@ Selection: ");
                     CallMenu(); // Call the menu
                     break;
 
+                case 'V': // Change subset
+                    ChangeSubset();
+                    CallMenu();
+                    break;
+
                 case 'W': // Delete subset
                     DeleteSubset();
                     CallMenu(); // Call the menu
@@ -424,7 +430,7 @@ Selection: ");
     public class FileOperations
     {
         string filePath = AppDomain.CurrentDomain.BaseDirectory + "data/"; // Files are to be found in this subdirectory
-        private bool _cancel { get; set; }
+        private bool _cancel { get; set; } = false;
         public string workingFile { get; set; }
 
         // Class constructor checks if the data subdirectory exists; if not, create it
@@ -545,7 +551,7 @@ Selection: ");
         }
     }
 
-    public class MainClass
+    public static class MainClass
     {
         public static void Main(string[] args)
         {
