@@ -572,7 +572,6 @@ Selection: ");
                 else
                 {
                     _cancel = true;
-                    Console.WriteLine(_cancel);
                     break;
                 }  
             }
