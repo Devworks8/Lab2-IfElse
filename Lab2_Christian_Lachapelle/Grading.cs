@@ -200,7 +200,8 @@ namespace Lab2_Christian_Lachapelle
             string name; // Student's Name
 
             // Formatted string template
-            string studentInfo = "Name: {0}, Percentage grade: {1, 0:F2}%, Letter grade for {2, 0:F2}% is {3}";
+            string header = String.Format("\n{0, -25}{1, -20}{2, -16}\n",
+                "Student Name", "Percentage Grade", "Letter Grade");
 
             Console.Write("\nEnter student name to view (* = ALL): ");
             name = Console.ReadLine();
@@ -226,25 +227,27 @@ namespace Lab2_Christian_Lachapelle
 
             if (name.Contains("*")) // Show all students
             {
-                Console.WriteLine("\n**** Listing all students ****\n");
-
                 Dictionary<string, Student>.ValueCollection student =
                     studentDict.Values;
 
+                Console.WriteLine(header);
                 foreach (Student obj in student)
                 {
-                    Console.WriteLine(String.Format($"{studentInfo}",
-                        obj.StudentName, obj.StudentGrade,
-                        obj.StudentGrade, obj.StudentLetterGrade));
+                    string output = String.Format("{0, -25}{1, -20}{2, -16}",
+                        obj.StudentName,
+                        CenterAligned(Convert.ToString(obj.StudentGrade), 20),
+                        CenterAligned(Convert.ToString(obj.StudentLetterGrade), 16));
+                    Console.WriteLine(output);
                 }
             }
             else if (!String.IsNullOrEmpty(name)) // Show requested student
             {
-                Console.WriteLine(String.Format($"{studentInfo}",
-                    studentDict[name].StudentName,
-                    studentDict[name].StudentGrade,
-                    studentDict[name].StudentGrade,
-                    studentDict[name].StudentLetterGrade));
+                Console.WriteLine(header);
+                string output = String.Format("{0, -25}{1, -20}{2, -16}",
+                        studentDict[name].StudentName,
+                    CenterAligned(Convert.ToString(studentDict[name].StudentGrade), 20),
+                    CenterAligned(Convert.ToString(studentDict[name].StudentLetterGrade), 16));
+                Console.WriteLine(output);
             }
             else
             {
@@ -334,7 +337,6 @@ namespace Lab2_Christian_Lachapelle
         {
             Console.Clear();
             Console.Write($@"
-What would you like to do?
 Current working file: {Path.GetFileName(workingFile)}
 
             File Operations
@@ -470,6 +472,20 @@ Selection: ");
                     
                     break;
             }
+        }
+
+        // This method adds padding to a string to center align
+        private string CenterAligned(string s, int width)
+        {
+            if (s.Length >= width)
+            {
+                return s;
+            }
+
+            int leftPadding = (width - s.Length) / 2;
+            int rightPadding = width - s.Length - leftPadding;
+
+            return new string(' ', leftPadding) + s + new string(' ', rightPadding);
         }
     }
 
