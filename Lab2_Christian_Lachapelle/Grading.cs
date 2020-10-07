@@ -111,6 +111,7 @@ namespace Lab2_Christian_Lachapelle
             {
                 // Add new student to dictionary
                 studentDict.Add(name, new Student(name, grade));
+                _isModified = true;
             }
             else
             {
@@ -157,6 +158,7 @@ namespace Lab2_Christian_Lachapelle
             else if (!_cancel)
             {
                 studentDict.Remove(name); // Remove single student from dictionary
+                _isModified = true;
             }
             else
             {
@@ -291,6 +293,8 @@ namespace Lab2_Christian_Lachapelle
                         break;
                     }
                 }
+
+                _isModified = true;
             }
             else
             {
@@ -314,14 +318,9 @@ Current working file: {workingFile}
             N) New File
             O) Open File
             S) Save File
+            V) View Files
             D) Delete File
             C) Close File
-
-            Subset Operations
-            -----------------
-            U) New Subset
-            V) Change Subset
-            W) Delete Subset
 
             Record Operations
             -----------------
@@ -338,7 +337,7 @@ Selection: ");
             // List of all valid menu selections
             var selections = new List<char>()
             {
-                'N', 'O', 'S', 'D', 'C', 'U', 'V', 'W', 'A', 'R', 'L', 'M', 'Q'
+                'N', 'O', 'S', 'V', 'D', 'C', 'A', 'R', 'L', 'M', 'Q'
             };
 
             /*
@@ -358,12 +357,30 @@ Selection: ");
             switch (char.ToUpper(ans))
             {
                 case 'N': // New file
-                    CreateNewSet();
+                    if (!_isModified)
+                    {
+                        CreateNewSet();
+                    }
+                    else
+                    {
+                        AskToSave();
+                        CreateNewSet();
+                    }
+
                     CallMenu(); // Call the menu
                     break;
 
                 case 'O': // Open file
-                    ReadSet(); // Need to validate file
+                    if (!_isModified)
+                    {
+                        ReadSet();
+                    }
+                    else
+                    {
+                        AskToSave();
+                        ReadSet();
+                    }
+
                     CallMenu(); // Call the menu
                     break;
 
@@ -372,28 +389,27 @@ Selection: ");
                     CallMenu(); // Call the menu
                     break;
 
+                case 'V': // List files
+                    ListSets();
+                    CallMenu();
+                    break;
+
                 case 'D': // Delete file
                     DeleteSet();
                     CallMenu(); // Call the menu
                     break;
 
                 case 'C': //Close file
-                    CloseSet();
-                    CallMenu(); // Call the menu
-                    break;
+                    if (!_isModified)
+                    {
+                        CloseSet();
+                    }
+                    else
+                    {
+                        AskToSave();
+                        CloseSet();
+                    }
 
-                case 'U': // New subset
-                    CreateNewSubset();
-                    CallMenu(); // Call the menu
-                    break;
-
-                case 'V': // Change subset
-                    ChangeSubset();
-                    CallMenu();
-                    break;
-
-                case 'W': // Delete subset
-                    DeleteSubset();
                     CallMenu(); // Call the menu
                     break;
 
@@ -418,7 +434,16 @@ Selection: ");
                     break;
 
                 default: // Exit application
-                    Environment.Exit(0);
+                    if (!_isModified)
+                    {
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        AskToSave();
+                        Environment.Exit(0);
+                    }
+                    
                     break;
             }
         }
@@ -432,6 +457,9 @@ Selection: ");
         string filePath = AppDomain.CurrentDomain.BaseDirectory + "data/"; // Files are to be found in this subdirectory
         private bool _cancel { get; set; } = false;
         public string workingFile { get; set; }
+        public bool _isModified = false; // File modification flag
+        private StreamReader reader; // File stream reader
+        private StreamWriter writer; // File stream writer
 
         // Class constructor checks if the data subdirectory exists; if not, create it
         public FileOperations()
@@ -458,15 +486,17 @@ Selection: ");
         // Close the file
         public void CloseSet()
         {
-            
+            reader.Close();
+            writer.Close();
+            workingFile = "";
         }
 
         // Validate file
-        public bool ValidateFile(string filename)
+        public bool ValidFile(string filename)
         {
-            string path = $@"{filePath}{filename}.csv";
+            string path = $@"{filePath}{filename}";
 
-            if (File.Exists(path))
+            if (File.Exists(path) || filename == ".csv")
             {
                 return false;
             }
@@ -486,7 +516,7 @@ Selection: ");
              * If the the file exists - try again
              * If filename is left blank - cancel operation 
              */
-            while (!ValidateFile(filename) || String.IsNullOrEmpty(filename))
+            while (!ValidFile(filename))
             {
                 if (!String.IsNullOrEmpty(filename))
                 {
@@ -505,6 +535,9 @@ Selection: ");
             {
                 // Assign path and filename to workingFile to be referenced later on
                 workingFile = $@"{filePath}{filename}.csv";
+                writer = new StreamWriter(workingFile); // Assign workingFile to the StreamWriter
+                reader = new StreamReader(workingFile); // Assign workingFile to the StreamReader
+                _isModified = true;
             }
             else
             {
@@ -519,34 +552,101 @@ Selection: ");
         // Delete file
         public void DeleteSet()
         {
-            
-        }
+            string fileName;
+            char ans;
+            var selections = new List<char>() { 'Y', 'N' };
 
-        // Change working file
-        public void ChangeSubset()
-        {
-            
-        }
+            Console.Write("Enter the filename you wish to delete: ");
+            fileName = Console.ReadLine();
 
-        // Create a new set of records in file
-        public void CreateNewSubset()
-        {
-            
-        }
+            while (!ValidFile(fileName+".csv"))
+            {
+                if (!String.IsNullOrEmpty(fileName))
+                {
+                    Console.WriteLine("ERROR: Invalid filename - Please try again");
+                    Console.WriteLine("\nPress any key to continue\n");
+                    Console.ReadKey(true);
+                    Console.Write("Enter the filename you wish to delete: ");
+                    fileName = Console.ReadLine();  
+                }
+                else
+                {
+                    _cancel = true;
+                    Console.WriteLine(_cancel);
+                    break;
+                }  
+            }
 
-        // Delete subset from file
-        public void DeleteSubset()
-        {
-            
+            if (!_cancel)
+            {
+                Console.Write($"Are you sure you wish delete {fileName}? [Y/N]: ");
+
+                while (!Char.TryParse(Console.ReadLine(), out ans) ||
+                    !(selections.Contains(Char.ToUpper(ans))))
+                {
+                    Console.WriteLine("ERROR: Invalid entry - Please try again");
+                    Console.WriteLine("\nPress any key to continue\n");
+                    Console.ReadKey(true);
+                    Console.Write($"Are you sure you wish delete {fileName}? [Y/N]: ");
+                }
+
+                switch (char.ToUpper(ans))
+                {
+                    case 'Y':
+                        Console.WriteLine($@"{filePath}{fileName}");
+                        File.Delete($@"{filePath}{fileName}");
+                        break;
+
+                    case 'N':
+                        Console.WriteLine("Operation cancelled");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Operation cancelled");
+            }
+
+            Console.WriteLine("\nPress any key to continue\n");
+            Console.ReadKey(true);
         }
 
         // List all available record sets in the data subdirectory
         public void ListSets()
         {
-            string[] files = Directory.GetFiles(filePath, "*.cvs");
+            string[] files = Directory.GetFiles(filePath, "*.csv");
             foreach (var file in files)
             {
-                Console.WriteLine(file);
+                Console.WriteLine(Path.GetFileName(file));
+            }
+            Console.WriteLine("\nPress any key to contiunue\n");
+            Console.ReadKey(true);
+        }
+
+        // Ask to save if there are modifications made
+        public void AskToSave()
+        {
+            Console.Write("Modifications were made - Do you wish to save? [Y/N]: ");
+            char ans;
+            var selections = new List<char>() { 'Y', 'N' };
+
+            while (!Char.TryParse(Console.ReadLine(), out ans) ||
+                !(selections.Contains(Char.ToUpper(ans))))
+            {
+                Console.WriteLine("ERROR: Invalid entry - Please try again");
+                Console.WriteLine("\nPress any key to continue\n");
+                Console.ReadKey(true);
+                Console.Write("Modifications were made - Do you wish to save? [Y/N]: ");
+            }
+
+            switch (char.ToUpper(ans))
+            {
+                case 'Y':
+                    WriteSet();
+                    break;
+
+                case 'N':
+                    break;
             }
         }
     }
