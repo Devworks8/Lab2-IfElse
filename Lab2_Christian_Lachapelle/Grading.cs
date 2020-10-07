@@ -3,16 +3,22 @@
  * Student #: A00230066
  * 
  * Title: Lab2 - If-Else
- * Version: 1.0
+ * Version: 2.0
  * 
  * Description: Give the user the option to add/remove/modify/list students.
  *              The application automatically provides the letter grade
  *              associated with the percentage grade.
+ *              
+ *              It save and read the data to/from a csv file.
+ *              
+ *              To cancel any operation, simply leave the input blank
+ *              by hitting the enter key.
  */
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Lab2_Christian_Lachapelle
 {
@@ -121,6 +127,24 @@ namespace Lab2_Christian_Lachapelle
 
             Console.WriteLine("\nPress any key to contiunue\n");
             Console.ReadKey(true);
+        }
+
+        // This method adds a new student to the dictionary - Using two arguments
+        public void AddStudent(string name, double grade)
+        {
+            try
+            {
+                studentDict.Add(name, new Student(name, grade));
+            }
+            catch (ArgumentNullException)
+            {
+                Console.WriteLine("\nKey is Null - Missing student name\n");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("\nERROR: Unable to add record - Duplicate\n");
+            }
+            
         }
 
         // This method removes a student or removes all students
@@ -311,7 +335,7 @@ namespace Lab2_Christian_Lachapelle
             Console.Clear();
             Console.Write($@"
 What would you like to do?
-Current working file: {workingFile}
+Current working file: {Path.GetFileName(workingFile)}
 
             File Operations
             ----------------
@@ -359,12 +383,12 @@ Selection: ");
                 case 'N': // New file
                     if (!_isModified)
                     {
-                        CreateNewSet();
+                        CreateNewSet(studentDict);
                     }
                     else
                     {
-                        AskToSave();
-                        CreateNewSet();
+                        AskToSave(studentDict);
+                        CreateNewSet(studentDict);
                     }
 
                     CallMenu(); // Call the menu
@@ -373,19 +397,19 @@ Selection: ");
                 case 'O': // Open file
                     if (!_isModified)
                     {
-                        ReadSet();
+                        ReadSet(studentDict);
                     }
                     else
                     {
-                        AskToSave();
-                        ReadSet();
+                        AskToSave(studentDict);
+                        ReadSet(studentDict);
                     }
 
                     CallMenu(); // Call the menu
                     break;
 
                 case 'S': // Save file
-                    WriteSet();
+                    WriteSet(studentDict);
                     CallMenu(); // Call the menu
                     break;
 
@@ -402,12 +426,12 @@ Selection: ");
                 case 'C': //Close file
                     if (!_isModified)
                     {
-                        CloseSet();
+                        CloseSet(studentDict);
                     }
                     else
                     {
-                        AskToSave();
-                        CloseSet();
+                        AskToSave(studentDict);
+                        CloseSet(studentDict);
                     }
 
                     CallMenu(); // Call the menu
@@ -440,7 +464,7 @@ Selection: ");
                     }
                     else
                     {
-                        AskToSave();
+                        AskToSave(studentDict);
                         Environment.Exit(0);
                     }
                     
@@ -458,8 +482,7 @@ Selection: ");
         private bool _cancel { get; set; } = false;
         public string workingFile { get; set; }
         public bool _isModified = false; // File modification flag
-        private StreamReader reader; // File stream reader
-        private StreamWriter writer; // File stream writer
+
 
         // Class constructor checks if the data subdirectory exists; if not, create it
         public FileOperations()
@@ -472,26 +495,104 @@ Selection: ");
         }
 
         // Read file
-        public void ReadSet()
+        public void ReadSet(Dictionary<string, Student> studentDict)
         {
+            _cancel = false; // Reset flag
+
+            Console.Write("\nEnter filename to open: ");
+            string filename = Console.ReadLine();
+
+            /*
+             * If the file doesn't exist print error message and ask for input
+             */
+            while (ValidFile(filename))
+            {
+                if (!String.IsNullOrEmpty(filename)) // If the input isn't empty
+                {
+                    Console.WriteLine($"ERROR: {filename} doesn't exist - Please try again");
+                    Console.Write("\nEnter new filename: ");
+                    filename = Console.ReadLine();
+                }
+                else // If input is empty, user requested to cancel operation
+                {
+                    _cancel = true; // Cancel operation
+                    break;
+                }
+            }
+
+            if (!_cancel)
+            {
+                // Assign path and filename to workingFile to be referenced later on
+                workingFile = $@"{filePath}{filename}";
+                StreamReader reader = new StreamReader(File.OpenRead(workingFile)); // Assign workingFile to the StreamReader
+
+                /*
+                 * Read the file stream until EOF is reached
+                 * and populate the dictionary for manupulation
+                 */
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (!String.IsNullOrWhiteSpace(line))
+                    {
+                        string[] values = line.Split(',');
+                        if (values.Length >= 3)
+                        {
+                            studentDict.Add(values[0], new Student(values[0], Convert.ToDouble(values[1])));
+                        }
+                    }
+                }
+                reader.Close(); // Close file stream
+            }
+            else
+            {
+                Console.WriteLine("\nOperation cancelled");
+            }
+
+            Console.WriteLine("\nPress any key to contiunue\n");
+            Console.ReadKey(true);
+        }
+
+        // This method saves changes to file
+        public void WriteSet(Dictionary<string, Student> studentDict)
+        {
+            //StreamWriter writer = new StreamWriter(File.OpenWrite(workingFile));
+            
+            if (!string.IsNullOrEmpty(workingFile))
+            {
+                var csv = new StringBuilder();
+
+                Dictionary<string, Student>.ValueCollection student =
+                        studentDict.Values;
+
+                foreach (Student obj in student)
+                {
+                    var record = string.Format("{0},{1},{2}", obj.StudentName,
+                        obj.StudentGrade, obj.StudentLetterGrade);
+                    csv.AppendLine(record);
+                }
+
+                File.WriteAllText(workingFile, csv.ToString());
+                _isModified = false;
+            }
+            else
+            {
+                Console.WriteLine("ERROR: No open file - Please try again");
+                Console.WriteLine("\nPress any key to continue\n");
+                Console.ReadKey(true);
+            }
             
         }
 
-        // Write File
-        public void WriteSet()
+        // This method clears the file and dictonary of records
+        public void CloseSet(Dictionary<string, Student> studentDict)
         {
-            
-        }
-
-        // Close the file
-        public void CloseSet()
-        {
-            reader.Close();
-            writer.Close();
+            studentDict.Clear();
+            _isModified = false;
             workingFile = "";
         }
 
-        // Validate file
+        // This method validates the file
         public bool ValidFile(string filename)
         {
             string path = $@"{filePath}{filename}";
@@ -504,8 +605,8 @@ Selection: ");
             return true;
         }
 
-        // Create a new file
-        public void CreateNewSet()
+        // This method gets from the user the new filename to use when saving changes
+        public void CreateNewSet(Dictionary<string, Student> studentDict)
         {
             _cancel = false; // Reset flag
 
@@ -516,7 +617,7 @@ Selection: ");
              * If the the file exists - try again
              * If filename is left blank - cancel operation 
              */
-            while (!ValidFile(filename))
+            while (ValidFile(filename) || String.IsNullOrEmpty(filename))
             {
                 if (!String.IsNullOrEmpty(filename))
                 {
@@ -533,11 +634,18 @@ Selection: ");
 
             if (!_cancel)
             {
-                // Assign path and filename to workingFile to be referenced later on
-                workingFile = $@"{filePath}{filename}.csv";
-                writer = new StreamWriter(workingFile); // Assign workingFile to the StreamWriter
-                reader = new StreamReader(workingFile); // Assign workingFile to the StreamReader
-                _isModified = true;
+                if (!_isModified)
+                {
+                    // Assign path and filename to workingFile to be referenced later on
+                    workingFile = $@"{filePath}{filename}.csv";
+                }
+                else
+                {
+                    AskToSave(studentDict);
+                    // Assign path and filename to workingFile to be referenced later on
+                    workingFile = $@"{filePath}{filename}.csv";
+                }
+                
             }
             else
             {
@@ -549,9 +657,10 @@ Selection: ");
             Console.ReadKey(true);
         }
 
-        // Delete file
+        // This method deletes a file
         public void DeleteSet()
         {
+            _cancel = false; // Reset flag
             string fileName;
             char ans;
             var selections = new List<char>() { 'Y', 'N' };
@@ -559,6 +668,10 @@ Selection: ");
             Console.Write("Enter the filename you wish to delete: ");
             fileName = Console.ReadLine();
 
+            /*
+             * If the file doesn't exist - try again
+             * If the input is empty - cancel operation
+             */
             while (!ValidFile(fileName+".csv"))
             {
                 if (!String.IsNullOrEmpty(fileName))
@@ -610,7 +723,7 @@ Selection: ");
             Console.ReadKey(true);
         }
 
-        // List all available record sets in the data subdirectory
+        // This method list all available files in the data subdirectory
         public void ListSets()
         {
             string[] files = Directory.GetFiles(filePath, "*.csv");
@@ -622,13 +735,17 @@ Selection: ");
             Console.ReadKey(true);
         }
 
-        // Ask to save if there are modifications made
-        public void AskToSave()
+        // This method ask to save if there are modifications made
+        public void AskToSave(Dictionary<string, Student> studentDict)
         {
             Console.Write("Modifications were made - Do you wish to save? [Y/N]: ");
             char ans;
             var selections = new List<char>() { 'Y', 'N' };
 
+            /*
+             * If the inout isn't a char or is not a valid answer
+             * Try again
+             */
             while (!Char.TryParse(Console.ReadLine(), out ans) ||
                 !(selections.Contains(Char.ToUpper(ans))))
             {
@@ -641,10 +758,12 @@ Selection: ");
             switch (char.ToUpper(ans))
             {
                 case 'Y':
-                    WriteSet();
+                    WriteSet(studentDict);
+                    _isModified = false;
                     break;
 
                 case 'N':
+                    _isModified = false;
                     break;
             }
         }
